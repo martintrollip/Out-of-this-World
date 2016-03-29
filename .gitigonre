@@ -98,3 +98,16 @@ target/
 .classpath
 .project
 .settings
+
+# X Code
+*.swp
+*˜.nib
+build/
+
+*.pbxuser
+*.perspective
+*.perspective3
+*.mode1v3
+*.move2v3
+xcuserdata
+.xcodeproj/!*.xcodeproj/project.pbxproj
