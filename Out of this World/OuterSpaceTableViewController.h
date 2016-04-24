@@ -7,9 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AddSpaceObjectViewController.h"
 
-@interface OuterSpaceTableViewController : UITableViewController
+@interface OuterSpaceTableViewController : UITableViewController <AddSpaceObjectViewControllerDelegate>
 
 @property (nonatomic, strong) NSMutableArray *planets;
+@property (nonatomic, strong) NSMutableArray *addedSpaceObjects;
+
+
 
 @end

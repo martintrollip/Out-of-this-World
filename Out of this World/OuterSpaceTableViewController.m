@@ -18,6 +18,21 @@
 
 @implementation OuterSpaceTableViewController
 
+#pragma mark - lazy init
+-(NSMutableArray *)planets{
+    if(!_planets){
+        _planets = [[NSMutableArray alloc] init];
+    }
+    return _planets;
+}
+
+-(NSMutableArray *)addedSpaceObjects{
+    if(!_addedSpaceObjects){
+        _addedSpaceObjects = [[NSMutableArray alloc] init];
+    }
+    return _addedSpaceObjects;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -67,6 +82,17 @@
         }
     }
     
+    //Check for the add item
+    if([segue .destinationViewController isKindOfClass:[AddSpaceObjectViewController class]]){
+        
+        //set delegate property of the addViewController
+        AddSpaceObjectViewController *addSpaceObjectViewController = segue.destinationViewController;
+        
+        //setting this view controller as the delegate for addspaceobjectvc
+        addSpaceObjectViewController.delegate = self;
+        
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -77,10 +103,16 @@
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    if([self.addedSpaceObjects count] ){
+        return 2;
+    }
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if(section == 1){
+        return [self.addedSpaceObjects count];
+    }
     return [self.planets count];
 }
 
@@ -91,17 +123,26 @@
     
     //Configure the cell here
     
+    if(indexPath.section == 1){
+        //use new sapce object to customise the cell
+        SpaceObject *planet = [self.addedSpaceObjects objectAtIndex:indexPath.row];
+        cell.textLabel.text = planet.name;
+        cell.detailTextLabel.text = planet.nickname;
+        
+        
+    }else{
+        //Load data from plant objects
+        SpaceObject *planet = self.planets[indexPath.row];
+        
+        cell.textLabel.text = planet.name;
+        cell.detailTextLabel.text = planet.nickname;
+        cell.imageView.image = planet.image;
+    }
+    
     //Set look and feel
     cell.backgroundColor = [UIColor clearColor];
     cell.textLabel.textColor = [UIColor whiteColor];
     cell.detailTextLabel.textColor = [UIColor colorWithWhite:0.5 alpha:0.9];
-    
-    //Load data from plant objects
-    SpaceObject *planet = self.planets[indexPath.row];
-    
-    cell.textLabel.text = planet.name;
-    cell.detailTextLabel.text = planet.nickname;
-    cell.imageView.image = planet.image;
     
     return cell;
 }
@@ -113,4 +154,29 @@
     [self performSegueWithIdentifier:@"PushToSpaceData" sender:indexPath];
 }
 
+
+#pragma mark - AddSpaceObjectViewController Delegate
+//these methods are called from the add space object file
+-(void)didCancel{
+    NSLog(@"didCancel");
+    //dismiss the addSpace object page
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+-(void)addSpaceObject:(SpaceObject *)spaceObject{
+    //Lazy instantiation, if the array is empty, make a new one
+    if(!self.addedSpaceObjects){
+        self.addedSpaceObjects = [[NSMutableArray alloc]init];
+    }
+    
+    [self.addedSpaceObjects addObject:spaceObject];
+    
+    NSLog(@"addSpaceObjhect");
+    
+    
+    [self.tableView reloadData];
+    
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 @end

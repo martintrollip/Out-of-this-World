@@ -7,7 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SpaceObject.h" 
+
+//Naming convention: nameOfClass+delegate
+@protocol AddSpaceObjectViewControllerDelegate <NSObject>
+
+@required
+-(void)addSpaceObject:(SpaceObject *)spaceObject; //on add click which pass a spaceobject back
+-(void)didCancel; //on cancel click
+
+@end
 
 @interface AddSpaceObjectViewController : UIViewController
+
+@property(weak,nonatomic) id <AddSpaceObjectViewControllerDelegate> delegate;
 
 @end
