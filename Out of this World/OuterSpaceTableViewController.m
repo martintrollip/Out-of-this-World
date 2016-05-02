@@ -17,6 +17,7 @@
 @end
 
 @implementation OuterSpaceTableViewController
+#define ADDED_SPACE_OBJECTS_KEY @"Added Space Objects"
 
 #pragma mark - lazy init
 -(NSMutableArray *)planets{
@@ -47,6 +48,12 @@
         [self.planets addObject:object];
     }
     
+    NSArray *mySavedPlanets =[[NSUserDefaults standardUserDefaults] arrayForKey:ADDED_SPACE_OBJECTS_KEY];
+    
+    for(NSDictionary *dictionary in mySavedPlanets){
+        SpaceObject *savedSpaceObject = [self spaceObjectForDictionary:dictionary];
+        [[self addedSpaceObjects] addObject:savedSpaceObject];//Save the objects to the array of objects
+    }
     
 }
 
@@ -174,9 +181,56 @@
     NSLog(@"addSpaceObjhect");
     
     
-    [self.tableView reloadData];
+    //Persist the space object in NSUserDefaults
+    NSMutableArray *propertiesOfSpaceObjects = [[[NSUserDefaults standardUserDefaults] arrayForKey:ADDED_SPACE_OBJECTS_KEY]mutableCopy];
     
+    if(!propertiesOfSpaceObjects){//Check if it's empty. lazy init
+        propertiesOfSpaceObjects = [[NSMutableArray alloc] init];
+    }
+    //Add the saved object to array and save
+    [propertiesOfSpaceObjects addObject:[self spaceObjectAsPropertyList:spaceObject]];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:propertiesOfSpaceObjects forKey:ADDED_SPACE_OBJECTS_KEY];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     [self dismissViewControllerAnimated:YES completion:nil];
+    
+}
+
+#pragma mark - Helper methods
+
+-(NSDictionary *)spaceObjectAsPropertyList:(SpaceObject *)spaceObject{
+    NSData *imageData = UIImagePNGRepresentation(spaceObject.image);
+    
+    NSDictionary *dict = @{PLANET_NAME : spaceObject.name,
+                           PLANET_GRAVITY: @(spaceObject.gravitationalForce),
+                           PLANET_DIAMETER:@(spaceObject.diameter),
+                           PLANET_YEAR_LENGTH: @(spaceObject.yearLength),
+                           PLANET_DAY_LENGTH: @(spaceObject.dayLength),
+                           PLANET_TEMPERATURE:@(spaceObject.templ),
+                           PLANET_NUMBER_OF_MOONS:@(spaceObject.numberOfMoons),
+                           
+                           PLANET_NICKNAME:spaceObject.nickname,
+                           PLANET_INTERESTING_FACT: spaceObject.interestingFact,
+                           PLANET_IMAGE:imageData};
+    
+    //All properties can be converted properly but for the image
+    //An image should not be saved in NSUserPreferences since it's large
+    //Save image to NSData
+    
+    
+    return dict;
+}
+
+-(SpaceObject *)spaceObjectForDictionary:(NSDictionary *)dictionary{
+    //Extract the image as well
+    
+    //Conver data object to image
+    NSData *imageData = dictionary[PLANET_IMAGE];
+    UIImage *image = [UIImage imageWithData:imageData];
+    
+    SpaceObject *object = [[SpaceObject alloc] initWithData:dictionary andImage:image];
+    
+    return object;
 }
 @end
